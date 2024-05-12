@@ -962,6 +962,7 @@ class StableDiffusionXLControlNetPipeline(
         guess_mode: bool = False,
         control_guidance_start: Union[float, List[float]] = 0.0,
         control_guidance_end: Union[float, List[float]] = 1.0,
+        ip_adapter_end: Optional[float] = None,
         original_size: Tuple[int, int] = None,
         crops_coords_top_left: Tuple[int, int] = (0, 0),
         target_size: Tuple[int, int] = None,
@@ -1420,6 +1421,9 @@ class StableDiffusionXLControlNetPipeline(
 
                 if ip_adapter_image is not None or ip_adapter_image_embeds is not None:
                     added_cond_kwargs["image_embeds"] = image_embeds
+                    if ip_adapter_end is not None:
+                        if t.item() <= 1000.0 * (1.0 - ip_adapter_end):
+                            self.set_ip_adapter_scale(0.0)
 
                 # predict the noise residual
                 noise_pred = self.unet(
